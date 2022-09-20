@@ -25,15 +25,14 @@ final class UserDataBagTest extends TestCase
         $this->assertSame('foo@example.com', $userDataBag->getEmail());
         $this->assertSame('my_user', $userDataBag->getUsername());
         $this->assertSame('my_segment', $userDataBag->getSegment());
-        // @FIXME-michi
-        // $this->assertSame(['city' => 'my_city'], $userDataBag->getGeo());
+        $this->assertSame(['city' => 'my_city'], $userDataBag->getGeo());
         $this->assertSame(['subscription' => 'basic'], $userDataBag->getMetadata());
     }
 
     /**
      * @dataProvider createFromArrayDataProvider
      */
-    public function testCreateFromArray(array $data, $expectedId, ?string $expectedIpAddress, ?string $expectedEmail, ?string $expectedUsername, ?string $expectedSegment, $expectedGeo, array $expectedMetadata): void
+    public function testCreateFromArray(array $data, $expectedId, ?string $expectedIpAddress, ?string $expectedEmail, ?string $expectedUsername, ?string $expectedSegment, ?array $expectedGeo, array $expectedMetadata): void
     {
         $userDataBag = UserDataBag::createFromArray($data);
 
@@ -42,8 +41,7 @@ final class UserDataBagTest extends TestCase
         $this->assertSame($expectedEmail, $userDataBag->getEmail());
         $this->assertSame($expectedUsername, $userDataBag->getUsername());
         $this->assertSame($expectedSegment, $userDataBag->getSegment());
-        // @FIXME-michi
-        // $this->assertSame($expectedGeo, $userDataBag->getGeo());
+        $this->assertSame($expectedGeo, $userDataBag->getGeo());
         $this->assertSame($expectedMetadata, $userDataBag->getMetadata());
     }
 
@@ -56,7 +54,7 @@ final class UserDataBagTest extends TestCase
             null,
             null,
             null,
-            [],
+            null,
             [],
         ];
 
@@ -67,7 +65,7 @@ final class UserDataBagTest extends TestCase
             null,
             null,
             null,
-            [],
+            null,
             [],
         ];
 
@@ -78,7 +76,7 @@ final class UserDataBagTest extends TestCase
             null,
             null,
             null,
-            [],
+            null,
             [],
         ];
 
@@ -89,7 +87,7 @@ final class UserDataBagTest extends TestCase
             'foo@example.com',
             null,
             null,
-            [],
+            null,
             [],
         ];
 
@@ -100,7 +98,7 @@ final class UserDataBagTest extends TestCase
             null,
             'my_user',
             null,
-            [],
+            null,
             [],
         ];
 
@@ -111,7 +109,18 @@ final class UserDataBagTest extends TestCase
             null,
             null,
             'my_segment',
+            null,
             [],
+        ];
+
+        yield [
+            ['city' => 'my_city'],
+            null,
+            null,
+            null,
+            null,
+            null,
+            ['city' => 'my_city'],
             [],
         ];
 
@@ -122,7 +131,7 @@ final class UserDataBagTest extends TestCase
             null,
             null,
             null,
-            [],
+            null,
             ['subscription' => 'basic'],
         ];
     }
@@ -199,15 +208,6 @@ final class UserDataBagTest extends TestCase
         UserDataBag::createFromUserIpAddress('foo');
     }
 
-    public function testSetGeoThrowsOnInvalidArgument(): void
-    {
-        $this->expectException(\TypeError::class);
-        $this->expectExceptionMessage('The $geo argument must be either an array or an instance of the "Sentry\Geo" class. Got: "string".');
-
-        $userDataBag = new UserDataBag();
-        $userDataBag->setGeo('foo');
-    }
-
     public function testMerge(): void
     {
         $userDataBag = UserDataBag::createFromUserIdentifier('unique_id');
@@ -217,6 +217,7 @@ final class UserDataBagTest extends TestCase
         $userDataBagToMergeWith->setEmail('foo@example.com');
         $userDataBagToMergeWith->setUsername('my_user');
         $userDataBagToMergeWith->setSegment('my_segment');
+        $userDataBagToMergeWith->setGeo(['city' => 'my_city']);
         $userDataBagToMergeWith->setMetadata('subscription', 'lifetime');
         $userDataBagToMergeWith->setMetadata('subscription_expires_at', '2020-08-20');
 
@@ -227,6 +228,7 @@ final class UserDataBagTest extends TestCase
         $this->assertSame('foo@example.com', $userDataBag->getEmail());
         $this->assertSame('my_user', $userDataBag->getUsername());
         $this->assertSame('my_segment', $userDataBag->getSegment());
+        $this->assertSame(['city' => 'my_city'], $userDataBag->getGeo());
         $this->assertSame(['subscription' => 'lifetime', 'subscription_expires_at' => '2020-08-20'], $userDataBag->getMetadata());
     }
 }

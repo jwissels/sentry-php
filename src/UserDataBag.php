@@ -37,7 +37,7 @@ final class UserDataBag
     private $segment;
 
     /**
-     * @var \Sentry\Geo|null Approximate geographical location of the end user or device
+     * @var array|null Approximate geographical location of the end user or device
      */
     private $geo;
 
@@ -56,13 +56,15 @@ final class UserDataBag
         ?string $email = null,
         ?string $ipAddress = null,
         ?string $username = null,
-        ?string $segment = null
+        ?string $segment = null,
+        ?array $geo = null
     ) {
         $this->setId($id);
         $this->setEmail($email);
         $this->setIpAddress($ipAddress);
         $this->setUsername($username);
         $this->setSegment($segment);
+        $this->setGeo($geo);
     }
 
     /**
@@ -112,7 +114,7 @@ final class UserDataBag
                     $instance->setSegment($value);
                     break;
                 case 'geo':
-                    $instance->setGeo($value);
+                    $instance->setGeo($field, $value);
                     break;
                 default:
                     $instance->setMetadata($field, $value);
@@ -204,7 +206,7 @@ final class UserDataBag
     /**
      * Gets the geo of the user.
      */
-    public function getGeo(): ?Geo
+    public function getGeo(): ?array
     {
         return $this->geo;
     }
@@ -212,18 +214,10 @@ final class UserDataBag
     /**
      * Sets the geo of the user.
      *
-     * @param array<string, string>|Geo $geo The geo
+     * @param array<string, array<string, string>|null
      */
-    public function setGeo($geo): void
+    public function setGeo(?array $geo): void
     {
-        if (!\is_array($geo) && !$geo instanceof Geo) {
-            throw new \TypeError(sprintf('The $geo argument must be either an array or an instance of the "%s" class. Got: "%s".', Geo::class, get_debug_type($geo)));
-        }
-
-        if (\is_array($geo)) {
-            $geo = Geo::createFromArray($geo);
-        }
-
         $this->geo = $geo;
     }
 
